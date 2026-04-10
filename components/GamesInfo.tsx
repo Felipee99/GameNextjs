@@ -16,7 +16,7 @@ export const dynamic = "force-dynamic";
 export default async function GamesInfo({
   searchParams,
 }: {
-  searchParams: Promise<{ search?: string; page?: string }>;
+  searchParams: { search?: string; page?: string };
 }) {
   const params = await searchParams;
 
