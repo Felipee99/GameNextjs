@@ -1,26 +1,68 @@
 @import "tailwindcss";
+@plugin "daisyui";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+.card-neon {
+  position: relative;
+  border-radius: 16px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* CARD INTERNA */
+.card-content {
+  position: relative;
+  z-index: 2;
+  background: rgba(20, 20, 20, 0.95);
+  border-radius: 18px; /* 👈 un poco menor para que se vea el borde */
+  overflow: hidden;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* LINEA DE LUZ */
+.card-neon::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+
+  background: linear-gradient(90deg, transparent, cyan, transparent);
+  background-size: 300% 300%;
+
+  animation: move-border 2.5s linear infinite;
+
+  opacity: 0;
+  transition: opacity 0.3s ease;
+
+  /* 🔥 ESTA ES LA CLAVE REAL */
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  padding: 2px;
+}
+
+/* HOVER */
+.card-neon:hover::before {
+  opacity: 1;
+}
+
+/* ANIMACIÓN */
+@keyframes move-border {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 300% 50%;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  background: rgba(17, 24, 39, 0.6);
+  border: 1px solid #4b5563;
+  color: white;
+  transition: 0.3s;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #facc15;
+  box-shadow: 0 0 10px rgba(250, 204, 21, 0.4);
 }
