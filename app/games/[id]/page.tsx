@@ -1,8 +1,6 @@
 import { PrismaClient } from "@/app/generated/prisma";
 import { PrismaNeon } from "@prisma/adapter-neon";
 
-import { stackServerApp } from "@/stack/server";
-import { redirect } from "next/navigation";
 
 const prisma = new PrismaClient({
   adapter: new PrismaNeon({
@@ -13,15 +11,10 @@ const prisma = new PrismaClient({
 export default async function GameDetail({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const user = await stackServerApp.getUser();
-
-  if (!user) {
-    redirect("/");
-  }
-
-  const gameId = Number(params.id);
+  const { id } = await params; // CLAVE
+  const gameId = Number(id);
 
   if (!gameId) {
     return <div className="p-6 text-red-500">ID inválido</div>;
@@ -115,7 +108,7 @@ export default async function GameDetail({
         </div>
       </div>
 
-      {/* GLOW DECORATIVO */}
+      {/* 🔥 GLOW DECORATIVO */}
       <div className="absolute top-10 left-10 w-40 h-40 bg-cyan-500/20 blur-3xl rounded-full"></div>
       <div className="absolute bottom-10 right-10 w-40 h-40 bg-purple-500/20 blur-3xl rounded-full"></div>
     </div>
