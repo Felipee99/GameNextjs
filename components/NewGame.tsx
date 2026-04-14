@@ -39,7 +39,7 @@ export default function NewGame({ consoles }: any) {
       <div className="absolute inset-0 bg-[url('/imgs/bg_game.png')] bg-cover bg-center"></div>
       <div className="absolute inset-0 bg-black/80 backdrop-blur-sm"></div>
 
-      <div className="mb-4">
+      <div className="absolute top-6 left-6 z-20">
         <Link
           href="/games"
           className="inline-block px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 transition text-sm"
