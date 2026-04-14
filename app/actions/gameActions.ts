@@ -37,19 +37,7 @@ export async function createGame(formData: FormData) {
 
         const data = result.data;
 
-        const file = formData.get("cover");
-
-        if (!(file instanceof File) || file.size === 0) {
-            return { success: false };
-        }
-
-        const fileName = `${Date.now()}-${file.name}`;
-        const buffer = Buffer.from(await file.arrayBuffer());
-
-        fs.writeFileSync(
-            path.join(process.cwd(), "public/imgs", fileName),
-            buffer
-        );
+        const fileName = "default.png"; // 
 
         await prisma.game.create({
             data: {
@@ -78,15 +66,6 @@ export async function deleteGame(id: number) {
         });
 
         if (!game) return { success: false };
-
-        // 🔥 eliminar imagen
-        if (game.cover) {
-            const filePath = path.join(process.cwd(), "public/imgs", game.cover);
-
-            if (fs.existsSync(filePath)) {
-                fs.unlinkSync(filePath);
-            }
-        }
 
         // 🔥 eliminar en BD
         await prisma.game.delete({
@@ -123,19 +102,7 @@ export async function updateGame(id: number, formData: FormData) {
     const data = result.data;
 
     const file = formData.get("cover");
-    let fileName: string | undefined;
-
-    if (file instanceof File && file.size > 0) {
-        const newFileName = `${Date.now()}-${file.name}`;
-        const buffer = Buffer.from(await file.arrayBuffer());
-
-        fs.writeFileSync(
-            path.join(process.cwd(), "public/imgs", newFileName),
-            buffer
-        );
-
-        fileName = newFileName;
-    }
+    let fileName: string | undefined = undefined;
 
     const existingGame = await prisma.game.findUnique({
         where: { id },
