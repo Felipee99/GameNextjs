@@ -1,6 +1,9 @@
 import { PrismaClient } from "@/app/generated/prisma";
 import { PrismaNeon } from "@prisma/adapter-neon";
 
+import { stackServerApp } from "@/stack/server";
+import { redirect } from "next/navigation";
+
 const prisma = new PrismaClient({
   adapter: new PrismaNeon({
     connectionString: process.env.DATABASE_URL!,
@@ -10,10 +13,15 @@ const prisma = new PrismaClient({
 export default async function GameDetail({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: { id: string };
 }) {
-  const { id } = await params; // CLAVE
-  const gameId = Number(id);
+  const user = await stackServerApp.getUser();
+
+  if (!user) {
+    redirect("/");
+  }
+
+  const gameId = Number(params.id);
 
   if (!gameId) {
     return <div className="p-6 text-red-500">ID inválido</div>;

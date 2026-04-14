@@ -1,8 +1,11 @@
 import { PrismaClient } from "@/app/generated/prisma";
 import { PrismaNeon } from "@prisma/adapter-neon";
-import { updateGame } from "@/app/actions/gameActions";
 import Link from "next/link";
 import EditGameForm from "@/components/EditGameForm";
+
+
+import { stackServerApp } from "@/stack/server";
+import { redirect } from "next/navigation";
 
 const prisma = new PrismaClient({
   adapter: new PrismaNeon({
@@ -15,6 +18,14 @@ export default async function EditGame({
 }: {
   params: Promise<{ id: string }>;
 }) {
+
+  // 🔐 VALIDAR SESIÓN
+  const user = await stackServerApp.getUser();
+
+  if (!user) {
+    redirect("/");
+  }
+
   const { id } = await params;
   const gameId = Number(id);
 
@@ -50,7 +61,6 @@ export default async function EditGame({
 
       {/* FORM */}
       <EditGameForm game={game} consoles={consoles} />
-     
     </div>
   );
 }
