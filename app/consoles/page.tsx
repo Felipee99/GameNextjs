@@ -10,7 +10,7 @@ export default async function ConsolasPage({
 }) {
   const user = await stackServerApp.getUser();
 
-  // 🔐 PROTECCIÓN (igual que games)
+  // PROTECCIÓN DE RUTA
   if (!user) {
     redirect("/");
   }

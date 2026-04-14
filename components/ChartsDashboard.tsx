@@ -10,13 +10,15 @@ import {
   Legend,
 } from "chart.js";
 
+// registrar componentes necesarios de Chart.js
 ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend);
 
+// tipos de datos que recibe el componente
 interface DashboardProps {
   salesByYear: { year: number; total: number }[];
   avgSalesByConsole: {
     console_id: number;
-    console_name: string; // 🔥 nombre real
+    console_name: string;
     avg: number;
   }[];
 }
@@ -25,29 +27,30 @@ export default function ChartsDashboard({
   salesByYear,
   avgSalesByConsole,
 }: DashboardProps) {
-  // 🎨 CONFIG GLOBAL (VISIBLE EN FONDO OSCURO)
+
+  // configuración global del gráfico (colores para fondo oscuro)
   const options = {
     responsive: true,
     plugins: {
       legend: {
         labels: {
-          color: "#fff",
+          color: "#fff", // texto de la leyenda en blanco
         },
       },
     },
     scales: {
       x: {
-        ticks: { color: "#fff" },
-        grid: { color: "rgba(255,255,255,0.1)" },
+        ticks: { color: "#fff" }, // texto eje X
+        grid: { color: "rgba(255,255,255,0.1)" }, // líneas suaves
       },
       y: {
-        ticks: { color: "#fff" },
+        ticks: { color: "#fff" }, // texto eje Y
         grid: { color: "rgba(255,255,255,0.1)" },
       },
     },
   };
 
-  // 📊 VENTAS POR AÑO
+  // datos del gráfico: ventas por año
   const dataSales = {
     labels: salesByYear.map((item) => item.year),
     datasets: [
@@ -61,10 +64,10 @@ export default function ChartsDashboard({
     ],
   };
 
-  // 📈 PROMEDIO POR CONSOLA (YA CON NOMBRE 🔥)
+  // datos del gráfico: promedio de ventas por consola
   const dataAvg = {
     labels: avgSalesByConsole.map(
-      (c) => c.console_name // 🔥 aquí está la magia
+      (c) => c.console_name // nombre de la consola en el eje X
     ),
     datasets: [
       {
@@ -79,18 +82,19 @@ export default function ChartsDashboard({
 
   return (
     <div className="grid md:grid-cols-2 gap-6 mt-10">
-      
-      {/* 📊 VENTAS */}
+
+      {/* gráfico ventas por año */}
       <div className="bg-gray-900 p-6 rounded-xl shadow-lg">
         <h2 className="text-xl mb-4 text-white">Ventas por año</h2>
         <Bar data={dataSales} options={options} />
       </div>
 
-      {/* 📈 PROMEDIO */}
+      {/* gráfico promedio por consola */}
       <div className="bg-gray-900 p-6 rounded-xl shadow-lg">
         <h2 className="text-xl mb-4 text-white">Promedio por consola</h2>
         <Bar data={dataAvg} options={options} />
       </div>
+
     </div>
   );
 }

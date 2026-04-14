@@ -19,7 +19,7 @@ export default async function EditGame({
   params: Promise<{ id: string }>;
 }) {
 
-  // 🔐 VALIDAR SESIÓN
+  // VALIDAR SESIÓN
   const user = await stackServerApp.getUser();
 
   if (!user) {

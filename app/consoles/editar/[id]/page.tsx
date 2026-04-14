@@ -1,6 +1,6 @@
 import { PrismaClient } from "@/app/generated/prisma";
 import { PrismaNeon } from "@prisma/adapter-neon";
-import { updateConsole } from "@/app/actions/consoleActions"; // 👈 tu acción server para actualizar consolas
+import { updateConsole } from "@/app/actions/consoleActions"; 
 import Link from "next/link";
 
 const prisma = new PrismaClient({

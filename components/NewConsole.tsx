@@ -15,13 +15,17 @@ export default function NewConsole() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative p-6">
-      {/* FONDO */}
+    // CONTENEDOR PRINCIPAL: aquí se centra todo en pantalla
+    <div className="min-h-screen relative flex items-center justify-center p-6">
+
+      {/* FONDO: imagen de fondo */}
       <div className="absolute inset-0 bg-[url('/imgs/bg_game.png')] bg-cover bg-center"></div>
+
+      {/* OVERLAY: oscurece y da efecto blur */}
       <div className="absolute inset-0 bg-black/80 backdrop-blur-sm"></div>
 
-      {/* VOLVER */}
-      <div className="mb-4">
+      {/* BOTÓN VOLVER: posición fija arriba a la izquierda */}
+      <div className="absolute top-6 left-6 z-20">
         <Link
           href="/consolas"
           className="inline-block px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 transition text-sm"
@@ -30,19 +34,20 @@ export default function NewConsole() {
         </Link>
       </div>
 
-      {/* FORM */}
+      {/* FORMULARIO: centrado en el contenedor principal */}
       <form
         action={createConsole}
         className="relative z-10 w-full max-w-2xl bg-gray-900/40 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-2xl flex flex-col gap-5"
       >
-        {/* TITULO */}
+        {/* TÍTULO */}
         <h2 className="text-3xl font-bold text-center bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
           Crear Consola 🎮
         </h2>
 
-        {/* INPUTS */}
+        {/* INPUTS PRINCIPALES */}
         <div className="grid grid-cols-1 gap-4">
-          
+
+          {/* Nombre */}
           <input
             name="name"
             placeholder="Nombre de la consola"
@@ -50,6 +55,7 @@ export default function NewConsole() {
             className="input"
           />
 
+          {/* Fabricante */}
           <input
             name="manufacturer"
             placeholder="Fabricante"
@@ -57,6 +63,7 @@ export default function NewConsole() {
             className="input"
           />
 
+          {/* Fecha de lanzamiento */}
           <input
             type="date"
             name="releasedate"
@@ -64,6 +71,7 @@ export default function NewConsole() {
             className="input"
           />
 
+          {/* Descripción */}
           <textarea
             name="description"
             placeholder="Descripción"
@@ -71,12 +79,15 @@ export default function NewConsole() {
             required
           />
 
-          {/* IMAGEN */}    
+          {/* IMAGEN */}
           <div className="flex flex-col gap-2">
+
+            {/* label de ayuda */}
             <label className="text-sm text-gray-300">
               Imagen de la consola
             </label>
 
+            {/* input file */}
             <input
               type="file"
               name="image"
@@ -86,6 +97,7 @@ export default function NewConsole() {
               required
             />
 
+            {/* preview de imagen */}
             {preview && (
               <img
                 src={preview}
@@ -95,13 +107,13 @@ export default function NewConsole() {
           </div>
         </div>
 
-        {/* BOTON */}
+        {/* BOTÓN SUBMIT */}
         <button className="mt-2 py-3 rounded-xl bg-green-500 hover:bg-green-600 transition">
           Crear Consola
         </button>
       </form>
 
-      {/* ESTILOS */}
+      {/* ESTILOS INPUT (custom) */}
       <style jsx>{`
         .input {
           width: 100%;

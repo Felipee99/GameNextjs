@@ -106,7 +106,7 @@ export default async function ConsoleDetail({
         </div>
       </div>
 
-      {/* 🔥 GLOW DECORATIVO */}
+      {/* GLOW DECORATIVO */}
       <div className="absolute top-10 left-10 w-40 h-40 bg-cyan-500/20 blur-3xl rounded-full"></div>
       <div className="absolute bottom-10 right-10 w-40 h-40 bg-purple-500/20 blur-3xl rounded-full"></div>
     </div>

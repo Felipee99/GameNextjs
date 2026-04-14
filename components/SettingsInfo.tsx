@@ -38,7 +38,7 @@ export default function SettingsInfo() {
         {/* 🔹 CONTENIDO REAL */}
         <div className="flex-1 bg-white/5 p-6 rounded-xl">
           
-          {/* 🔥 AQUÍ VA TODO STACK */}
+          {/* AQUÍ VA TODO STACK */}
           <AccountSettings />
 
         </div>

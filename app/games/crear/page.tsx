@@ -13,7 +13,7 @@ const prisma = new PrismaClient({
 
 export default async function Page() {
 
-  // 🔐 VALIDAR SESIÓN
+  // VALIDAR SESIÓN
   const user = await stackServerApp.getUser();
 
   if (!user) {

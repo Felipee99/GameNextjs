@@ -31,7 +31,7 @@ export default function DeleteGameButton({ id }: { id: number }) {
         confirmButtonColor: "#22c55e",
       });
 
-      router.refresh(); // 🔥 recarga datos SIN recargar página
+      router.refresh(); 
     } else {
       Swal.fire("Error", "No se pudo eliminar", "error");
     }
