@@ -37,7 +37,7 @@ export async function createGame(formData: FormData) {
 
         const data = result.data;
 
-        const fileName = "default.png"; // 
+        const fileName = "no-image.png"; 
 
         await prisma.game.create({
             data: {
