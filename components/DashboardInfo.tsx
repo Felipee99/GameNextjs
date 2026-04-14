@@ -57,7 +57,7 @@ export default async function DashboardInfo() {
 
           {gamesByConsole.map((console) => {
             const percentage =
-              (console._count.games / maxGames) * 100;
+              (console._count.games / maxGames) * 100 ;
 
             return (
               <div key={console.id} className="mb-4">

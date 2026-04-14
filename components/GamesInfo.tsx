@@ -2,8 +2,8 @@ import { PrismaClient } from "@/app/generated/prisma";
 import { PrismaNeon } from "@prisma/adapter-neon";
 import Link from "next/link";
 import { deleteGame } from "@/app/actions/gameActions";
-import SearchBar from "./SearchBar";
 import { Prisma } from "@/app/generated/prisma";
+import DeleteGameButton from "./DeleteGameButton";
 
 const prisma = new PrismaClient({
   adapter: new PrismaNeon({
@@ -16,23 +16,31 @@ export const dynamic = "force-dynamic";
 export default async function GamesInfo({
   searchParams,
 }: {
-  searchParams: { search?: string; page?: string };
+  searchParams: { search?: string; page?: string; console?: string };
 }) {
   const params = await searchParams;
 
   const search = params?.search || "";
+  const consoleFilter = params?.console || "";
   const currentPage = Number(params?.page ?? 1);
   const pageSize = 12;
 
-  // 🔍 FILTRO
-  const where: Prisma.GameWhereInput = search
-    ? {
-        title: {
-          contains: search,
-          mode: "insensitive",
-        },
-      }
-    : {};
+  // 🔥 TRAER CONSOLAS
+  const consoles = await prisma.console.findMany();
+
+  // 🔍 FILTRO DINÁMICO
+  const where: Prisma.GameWhereInput = {
+    ...(search && {
+      title: {
+        contains: search,
+        mode: "insensitive",
+      },
+    }),
+
+    ...(consoleFilter && {
+      console_id: Number(consoleFilter),
+    }),
+  };
 
   // 📊 TOTAL
   const totalGames = await prisma.game.count({ where });
@@ -59,21 +67,53 @@ export default async function GamesInfo({
       {/* CONTENIDO */}
       <div className="relative z-10 p-6 text-white">
         <h1 className="text-4xl font-extrabold mb-6 text-center bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-          Games Hub 🍊
+          Games Hub 🎮
         </h1>
 
-        {/* 🔍 BUSCADOR */}
-        <SearchBar />
+        {/* 🔍 FILTRO + BUSCADOR */}
+        <form method="GET" className="mb-6 flex flex-wrap gap-3 justify-center">
+          <input
+            type="text"
+            name="search"
+            placeholder="Buscar juego..."
+            defaultValue={search}
+            className="input"
+          />
+
+          <div className="flex flex-wrap gap-2 justify-center">
+            {/* TODAS */}
+            <Link
+              href={`/games?search=${search}`}
+              className={`px-3 py-1 rounded-full text-sm transition border ${
+                !consoleFilter
+                  ? "bg-cyan-500 text-white border-cyan-400"
+                  : "bg-gray-800 text-gray-300 border-gray-600 hover:bg-gray-700"
+              }`}
+            >
+              Todas
+            </Link>
+
+            {consoles.map((c) => (
+              <Link
+                key={c.id}
+                href={`/games?search=${search}&console=${c.id}`}
+                className={`px-3 py-1 rounded-full text-sm transition border ${
+                  Number(consoleFilter) === c.id
+                    ? "bg-cyan-500 text-white border-cyan-400"
+                    : "bg-gray-800 text-gray-300 border-gray-600 hover:bg-gray-700"
+                }`}
+              >
+                {c.name}
+              </Link>
+            ))}
+          </div>
+        </form>
 
         {/* ➕ CREAR */}
         <div className="mb-6 flex justify-end">
           <Link href="/games/crear">
-            <button className="relative group px-6 py-3 rounded-xl overflow-hidden bg-gradient-to-r from-green-400 to-emerald-500 text-white font-semibold tracking-wide shadow-lg transition duration-300 hover:scale-105 hover:shadow-green-500/40 active:scale-95">
-              <span className="absolute inset-0 bg-gradient-to-r from-green-300 to-emerald-400 opacity-0 group-hover:opacity-30 blur-xl transition duration-500"></span>
-              <span className="absolute inset-0 rounded-xl border border-white/10 group-hover:border-green-300/40 transition"></span>
-              <span className="relative z-10 flex items-center gap-2">
-                Crear juego
-              </span>
+            <button className="px-6 py-3 rounded-xl bg-green-500 hover:bg-green-600 transition">
+              Crear juego
             </button>
           </Link>
         </div>
@@ -91,8 +131,8 @@ export default async function GamesInfo({
             </div>
           ) : (
             games.map((game) => (
-              <div key={game.id} className="card-neon p-[14px] h-full group">
-                <div className="card-content h-full flex flex-col justify-between relative transition duration-300 group-hover:scale-105 group-hover:z-10 shadow-lg">
+              <div key={game.id} className="card-neon p-[14px] h-full">
+                <div className="card-content h-full flex flex-col justify-between">
                   {/* IMAGEN */}
                   <img
                     src={`/imgs/${game.cover}`}
@@ -129,17 +169,7 @@ export default async function GamesInfo({
                         Editar
                       </Link>
 
-                      <form
-                        action={async () => {
-                          "use server";
-                          await deleteGame(game.id);
-                        }}
-                        className="flex-1"
-                      >
-                        <button className="w-full text-xs bg-red-500/20 py-1 rounded-lg hover:bg-red-500/40 transition">
-                          Eliminar
-                        </button>
-                      </form>
+                      <DeleteGameButton id={game.id} />
                     </div>
                   </div>
                 </div>
@@ -154,7 +184,7 @@ export default async function GamesInfo({
             {Array.from({ length: totalPages }, (_, i) => (
               <Link
                 key={i}
-                href={`/games?search=${search}&page=${i + 1}`}
+                href={`/games?search=${search}&console=${consoleFilter}&page=${i + 1}`}
                 className={`px-3 py-1 rounded-lg transition ${
                   currentPage === i + 1
                     ? "bg-cyan-500 text-white"
@@ -167,6 +197,8 @@ export default async function GamesInfo({
           </div>
         )}
       </div>
+
+      <input className="p-2 rounded-lg bg-gray-900/60 border border-gray-600 text-white" />
     </div>
   );
 }

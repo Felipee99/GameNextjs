@@ -3,9 +3,10 @@
 import { PrismaClient } from "@/app/generated/prisma";
 import { PrismaNeon } from "@prisma/adapter-neon";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation"; 
+import { redirect } from "next/navigation";
 import fs from "fs";
 import path from "path";
+import { gameSchema } from "../schemas/gameSchema";
 
 const prisma = new PrismaClient({
     adapter: new PrismaNeon({
@@ -13,70 +14,129 @@ const prisma = new PrismaClient({
     }),
 });
 
-export async function createGame(formData: FormData) {
-    const file = formData.get("cover") as File;
 
-    if (!file || file.size === 0) {
-        throw new Error("Imagen requerida");
+// gameActions.ts
+
+export async function createGame(formData: FormData) {
+    try {
+        const rawData = {
+            title: formData.get("title"),
+            developer: formData.get("developer"),
+            price: formData.get("price"),
+            genre: formData.get("genre"),
+            description: formData.get("description"),
+            console_id: formData.get("console_id"),
+            releasedate: formData.get("releasedate"),
+        };
+
+        const result = gameSchema.safeParse(rawData);
+
+        if (!result.success) {
+            return { success: false };
+        }
+
+        const data = result.data;
+
+        const file = formData.get("cover");
+
+        if (!(file instanceof File) || file.size === 0) {
+            return { success: false };
+        }
+
+        const fileName = `${Date.now()}-${file.name}`;
+        const buffer = Buffer.from(await file.arrayBuffer());
+
+        fs.writeFileSync(
+            path.join(process.cwd(), "public/imgs", fileName),
+            buffer
+        );
+
+        await prisma.game.create({
+            data: {
+                ...data,
+                cover: fileName,
+                description: data.description ?? "",
+            },
+        });
+
+        revalidatePath("/games");
+
+        return { success: true };
+    } catch (error) {
+        return { success: false };
+    }
+}
+
+
+//  ELIMINAR (CON RESPUESTA)
+// gameActions.ts
+
+export async function deleteGame(id: number) {
+    try {
+        const game = await prisma.game.findUnique({
+            where: { id },
+        });
+
+        if (!game) return { success: false };
+
+        // 🔥 eliminar imagen
+        if (game.cover) {
+            const filePath = path.join(process.cwd(), "public/imgs", game.cover);
+
+            if (fs.existsSync(filePath)) {
+                fs.unlinkSync(filePath);
+            }
+        }
+
+        // 🔥 eliminar en BD
+        await prisma.game.delete({
+            where: { id },
+        });
+
+        revalidatePath("/games");
+
+        return { success: true };
+    } catch (error) {
+        return { success: false };
+    }
+}
+
+
+// ✅ EDITAR (para SweetAlert)
+export async function updateGame(id: number, formData: FormData) {
+    const rawData = {
+        title: formData.get("title"),
+        developer: formData.get("developer"),
+        price: formData.get("price"),
+        genre: formData.get("genre"),
+        description: formData.get("description"),
+        console_id: formData.get("console_id"),
+        releasedate: formData.get("releasedate"),
+    };
+
+    const result = gameSchema.safeParse(rawData);
+
+    if (!result.success) {
+        return { success: false };
     }
 
-    const fileName = `${Date.now()}-${file.name}`;
+    const data = result.data;
 
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
+    const file = formData.get("cover");
+    let fileName: string | undefined;
 
-    const filePath = path.join(process.cwd(), "public/imgs", fileName);
-
-    fs.writeFileSync(filePath, buffer);
-
-    await prisma.game.create({
-        data: {
-            title: formData.get("title") as string,
-            developer: formData.get("developer") as string,
-            price: Number(formData.get("price")),
-            genre: formData.get("genre") as string,
-            description: formData.get("description") as string,
-            cover: fileName,
-            console_id: Number(formData.get("console_id")),
-            releasedate: new Date(formData.get("releasedate") as string),
-        },
-    });
-
-    revalidatePath("/games");
-
-    redirect("/games");
-}
-
-// ELIMINAR
-export async function deleteGame(id: number) {
-    await prisma.game.delete({
-        where: { id },
-    });
-
-    revalidatePath("/games");
-}
-
-// EDITAR
-export async function updateGame(id: number, formData: FormData) {
-    const file = formData.get("cover") as File;
-
-    let fileName: string | undefined = undefined;
-
-    // SI SUBEN NUEVA IMAGEN
-    if (file && file.size > 0) {
+    if (file instanceof File && file.size > 0) {
         const newFileName = `${Date.now()}-${file.name}`;
+        const buffer = Buffer.from(await file.arrayBuffer());
 
-        const bytes = await file.arrayBuffer();
-        const buffer = Buffer.from(bytes);
-
-        const filePath = path.join(process.cwd(), "public/imgs", newFileName);
-
-        fs.writeFileSync(filePath, buffer);
+        fs.writeFileSync(
+            path.join(process.cwd(), "public/imgs", newFileName),
+            buffer
+        );
 
         fileName = newFileName;
     }
 
-    // OBTENER IMAGEN ACTUAL SI NO SUBEN NADA
     const existingGame = await prisma.game.findUnique({
         where: { id },
     });
@@ -84,18 +144,13 @@ export async function updateGame(id: number, formData: FormData) {
     await prisma.game.update({
         where: { id },
         data: {
-            title: formData.get("title") as string,
-            developer: formData.get("developer") as string,
-            price: Number(formData.get("price")),
-            genre: formData.get("genre") as string,
-            description: formData.get("description") as string,
-            console_id: Number(formData.get("console_id")),
-            releasedate: new Date(formData.get("releasedate") as string),
-
-            //  CLAVE
+            ...data,
+            description: data.description ?? "", // 🔥 FIX
             cover: fileName ?? existingGame?.cover,
         },
     });
 
     revalidatePath("/games");
+
+    return { success: true };
 }
